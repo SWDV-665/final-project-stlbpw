@@ -1,0 +1,49 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Home</ion-title>
+    <ion-button fill="clear" slot="end" (click)="goHome()">
+      <ion-icon slot="icon-only" name="home-outline" size="large"></ion-icon>
+    </ion-button>
+    <ion-button fill="clear" slot="end" (click)="openSettings()">
+      <ion-icon slot="icon-only" name="settings-outline" size="large"></ion-icon>
+    </ion-button>
+    <ion-button fill="clear" slot="end" (click)="openProfile()">
+      <ion-icon slot="icon-only" name="person-outline" size="large"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Home</ion-title>
+      <ion-button fill="clear" slot="end" (click)="goHome()">
+        <ion-icon slot="icon-only" name="home-outline" size="large"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" slot="end" (click)="openSettings()">
+        <ion-icon slot="icon-only" name="settings-outline" size="large"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" slot="end" (click)="openProfile()">
+        <ion-icon slot="icon-only" name="person-outline" size="large"></ion-icon>
+      </ion-button>
+    </ion-toolbar>
+  </ion-header>
+
+  <div id="image-container">
+    <img src="assets/img/temp1.png" alt="Description of the image">
+  </div>
+<!-- 
+  <ion-content> -->
+    <form (ngSubmit)="login()">
+      <ion-item>
+        <ion-label position="floating">Username</ion-label>
+        <ion-input type="text" [(ngModel)]="_username" name="_username"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">Password</ion-label>
+        <ion-input type="password" [(ngModel)]="_password" name="_password"></ion-input>
+      </ion-item>
+      <ion-button expand="full" type="submit">Login</ion-button>
+    </form>
+  <!-- </ion-content> -->
+</ion-content>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">nutritionscanner</string>
+    <string name="title_activity_main">nutritionscanner</string>
+    <string name="package_name">ionic.nutritionscanner</string>
+    <string name="custom_url_scheme">ionic.nutritionscanner</string>
+</resources>

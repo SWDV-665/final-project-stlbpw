@@ -25,7 +25,7 @@ import { PhotoService } from '../photo.service';
 })
 export class ScanPage implements OnInit {
 
-  public barcodeResult!: string;
+  public barcodeResult?: string;
 
   constructor(private router: Router, public photoService: PhotoService) {
     addIcons({ personOutline });
@@ -59,6 +59,7 @@ export class ScanPage implements OnInit {
     try {
       const code = await this.photoService.scanBarcode();
       console.log(code);
+      this.barcodeResult = code;
     } catch (e) {
       console.log(e);
     }

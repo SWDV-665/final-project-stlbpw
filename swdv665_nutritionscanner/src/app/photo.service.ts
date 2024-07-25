@@ -17,7 +17,9 @@ export class PhotoService {
   
   public barcodeResult!: string;
   private options: CapacitorBarcodeScannerOptions = {
-    scanButton: true,
+    scanButton: false,
+    scanInstructions: 'Place a barcode inside the rectangle',
+    scanOrientation: 3,
     hint: CapacitorBarcodeScannerTypeHintALLOption.ALL
   };
 

@@ -43,8 +43,24 @@ export class PhotoService {
 
   public async scanBarcode(): Promise<string> {
       this.barcodeResult = (await CapacitorBarcodeScanner.scanBarcode(this.options)).ScanResult;
+      this.barcodeResult = this.fixUPCA(this.barcodeResult);
       console.log('Barcode data:', this.barcodeResult);
       return this.barcodeResult;
+  }
+
+  public getBarcode(): string {
+    return this.barcodeResult;
+  }
+
+  //Maybe move this to the back-end server
+  private fixUPCA(barcode: string): string {
+    //add a 0 to the beginning of the barcode if it is 12 digits long
+    if (barcode.length == 12) {
+      return "0" + barcode;
+    }
+    else {
+      return barcode;
+    }
   }
 }
 

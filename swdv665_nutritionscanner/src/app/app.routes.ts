@@ -21,5 +21,9 @@ export const routes: Routes = [
     path: 'history',
     loadComponent: () => import('./history/history.page').then( m => m.HistoryPage)
   },
+  {
+    path: 'user-profile',
+    loadComponent: () => import('./user-profile/user-profile.page').then( m => m.UserProfilePage)
+  },
 
 ];

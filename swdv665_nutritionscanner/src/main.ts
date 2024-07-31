@@ -8,6 +8,7 @@ import { AppComponent } from './app/app.component';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { enableProdMode } from '@angular/core';
 import { environment } from './environments/environment';
+import { provideHttpClient } from '@angular/common/http';
 
 
 defineCustomElements(window);
@@ -20,5 +21,6 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
+    provideHttpClient(),
   ],
 });

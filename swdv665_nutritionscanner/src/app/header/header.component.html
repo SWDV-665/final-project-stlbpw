@@ -1,0 +1,14 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>{{title}}</ion-title>
+    <ion-button fill="clear" slot="end" (click)="goHome()">
+      <ion-icon slot="icon-only" name="home-outline" size="large"></ion-icon>
+    </ion-button>
+    <ion-button fill="clear" slot="end" (click)="openSettings()">
+      <ion-icon slot="icon-only" name="settings-outline" size="large"></ion-icon>
+    </ion-button>
+    <ion-button fill="clear" slot="end" (click)="openProfile()">
+      <ion-icon slot="icon-only" name="person-outline" size="large"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>

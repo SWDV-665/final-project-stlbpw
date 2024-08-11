@@ -16,7 +16,7 @@ const port = 3665;
 var db;
 var dbCollection;
 
-const uri = "mongodb+srv://brucepwilhelm:SeYIXfylGlnBD0wZ@nutritionapp.ivueb.mongodb.net/?retryWrites=true&w=majority&appName=NutritionApp";
+const uri = "mongodb+srv://brucepwilhelm:<PASSWORD>@nutritionapp.ivueb.mongodb.net/?retryWrites=true&w=majority&appName=NutritionApp";
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {

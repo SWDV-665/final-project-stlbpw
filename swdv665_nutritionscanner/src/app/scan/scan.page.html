@@ -3,15 +3,13 @@
 <ion-content [fullscreen]="true">
   <div>
 
-    <ion-button size="large" expand="block" (click)="startScan()">Scan Barcode</ion-button>
-    <ion-button size="large" expand="block" (click)="TESTgetNutritionInfoFromOffServer()">Test Server</ion-button>
 
   </div>
 
   <div>
-    <ion-card [class.disabled-card]="isCardDisabled" *ngIf="nutritionLabel.valid; else noData">
+    <ion-card class="ion-padding" [class.disabled-card]="isCardDisabled" *ngIf="nutritionLabel.valid; else noData">
       <ion-header>
-        <ion-card-title>{{nutritionLabel.brand}}  {{nutritionLabel.name}}</ion-card-title>
+        <ion-card-title>{{nutritionLabel.brand}} {{nutritionLabel.name}}</ion-card-title>
         <ion-card-subtitle>Serving Size: {{nutritionLabel.servingSize}}</ion-card-subtitle>
       </ion-header>
       <ion-card-content>
@@ -75,20 +73,35 @@
 </ion-content>
 
 <div>
-<ion-footer>
-  <ion-grid>
-    <ion-row>
-      <ion-col>
-        <ion-button color="tertiary" size="large" expand="block" [disabled]="isCancelButtonDisabled" (click)="cancel()">Cancel</ion-button>
-      </ion-col>
-      <ion-col>
-        <ion-button color="success" size="large" expand="block" [disabled]="isSaveButtonDisabled" (click)="saveNutritionData()">Save</ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-</ion-footer>
+  <ion-footer>
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <ion-button color="secondary" size="large" expand="block" (click)="openHistory()">History</ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button color="primary" size="large" expand="block" (click)="startScan()">Scan</ion-button>
+        </ion-col>
+      </ion-row>
+      <!-- <ion-row>
+        <ion-col>
+          <ion-button size="large" expand="block" (click)="TESTgetNutritionInfoFromOffServer()">Test Server</ion-button>
+        </ion-col>
+      </ion-row> -->
+      <ion-row>
+        <ion-col>
+          <ion-button color="tertiary" size="large" expand="block" [disabled]="isCancelButtonDisabled"
+            (click)="cancel()">Cancel</ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button color="success" size="large" expand="block" [disabled]="isSaveButtonDisabled"
+            (click)="saveNutritionData()">Save</ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-footer>
 
 
-<app-footer></app-footer>
+  <app-footer></app-footer>
 
 </div>

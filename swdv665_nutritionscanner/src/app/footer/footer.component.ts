@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonIcon, IonText,
   IonList, IonItem, IonInput, IonButton, IonLabel, IonFooter, IonGrid, IonRow, IonCol} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -8,6 +8,7 @@ import { settingsOutline } from 'ionicons/icons';
 import { Router, NavigationEnd } from '@angular/router';
 import { UserAdminService } from '../user-admin.service';
 import { UserdataService } from '../userdata.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-footer',
@@ -17,23 +18,22 @@ import { UserdataService } from '../userdata.service';
   imports: [IonContent, IonHeader, IonTitle, IonToolbar, IonIcon, IonList, IonItem,
     IonInput, IonButton, IonLabel, IonFooter, IonGrid, IonRow, IonCol, IonText]
 })
-export class FooterComponent  implements OnInit {
-  
-  totalCalories: number = 0;
 
-  constructor(private userdataService: UserdataService,
-    private router: Router ) { }
+export class FooterComponent implements OnInit, OnDestroy {
+  totalCalories: number = 0;
+  private totalCaloriesSubscription!: Subscription;
+
+  constructor(private userdataService: UserdataService, private router: Router) { }
+
+
 
   ngOnInit() {
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.totalCalories = this.userdataService.getTotalCalories();
-      }
+    this.totalCaloriesSubscription = this.userdataService.totalCalories$.subscribe(total => {
+      this.totalCalories = total;
     });
   }
-
+  
   ngOnDestroy() {
-    this.router.events.subscribe().unsubscribe();
+    this.totalCaloriesSubscription.unsubscribe();
   }
-
 }

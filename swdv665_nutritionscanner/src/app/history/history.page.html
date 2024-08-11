@@ -3,16 +3,17 @@
 <ion-content [fullscreen]="true">
 
   <ion-list class="padded-list" *ngIf="nutritionLabels.length > 0; else noData">
-    <ion-item-sliding *ngFor="let food of nutritionLabels; let i = index" #slider>
+    <ion-item-sliding *ngFor="let food of nutritionLabels; let i = index; let isFirst = first" 
+    [ngClass]="{'item-sliding-pulse': isFirst}" #slider>
       <ion-item>
         <ion-label><a href="{{food.productUrl}}">{{food.brand}}<br>{{food.name}}</a></ion-label>
         <p>Calories: {{food.calories}}</p>
       </ion-item>
       <ion-item-options>
-        <ion-item-option color="secondary" (click)="dummyAction()">
+        <!-- <ion-item-option color="secondary" (click)="dummyAction()">
           <ion-icon color="light" slot="icon-only" name="pencil"></ion-icon>
-        </ion-item-option>
-        <ion-item-option color="tertiary" (click)="dummyAction()">
+        </ion-item-option> -->
+        <ion-item-option color="tertiary" (click)="shareItem(i, slider)">
           <ion-icon color="light" slot="icon-only" name="share"></ion-icon>
         </ion-item-option>
         <ion-item-option color="danger" (click)="deleteItem(i)">

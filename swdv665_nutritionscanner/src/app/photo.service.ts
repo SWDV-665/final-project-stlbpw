@@ -1,7 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
-import { Filesystem, Directory } from '@capacitor/filesystem';
-import { Preferences } from '@capacitor/preferences';
 import { CapacitorBarcodeScanner, CapacitorBarcodeScannerOptions, CapacitorBarcodeScannerTypeHintALLOption } from '@capacitor/barcode-scanner';
 //https://www.youtube.com/watch?v=nUqiejQi0wM
 //https://github.com/Nykz/Capacitor-Barcode-App-in-Ionic-Angular/blob/main/src/app/home/cart/cart.page.ts
@@ -23,23 +20,7 @@ export class PhotoService {
     hint: CapacitorBarcodeScannerTypeHintALLOption.ALL
   };
 
-  public photos: UserPhoto[] = [];
-
   constructor() { }
-
-  public async addNewToGallery() {
-    // Take a photo
-    const capturedPhoto = await Camera.getPhoto({
-      resultType: CameraResultType.Uri,
-      source: CameraSource.Camera,
-      quality: 100
-    });
-
-    this.photos.unshift({
-      filepath: "soon...",
-      webviewPath: capturedPhoto.webPath!
-    });
-  }
 
   public async scanBarcode(): Promise<string> {
       this.barcodeResult = (await CapacitorBarcodeScanner.scanBarcode(this.options)).ScanResult;
@@ -62,9 +43,4 @@ export class PhotoService {
       return barcode;
     }
   }
-}
-
-export interface UserPhoto {
-  filepath: string;
-  webviewPath?: string;
 }

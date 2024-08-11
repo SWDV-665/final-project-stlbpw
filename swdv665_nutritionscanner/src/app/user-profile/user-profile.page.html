@@ -2,18 +2,45 @@
 
 <ion-content [fullscreen]="true">
 
-  <div>
+  <!-- List of Awesome Use Info -->
+   <ion-list>
+    <ion-item>
+      <ion-label>Username</ion-label>
+      <ion-note slot="end">{{userName}}</ion-note>
+    </ion-item>
+    <ion-item>
+      <ion-label>Email</ion-label>
+      <ion-note slot="end">{{email}}</ion-note>
+    </ion-item>
+    <ion-item>
+      <ion-label>First Name</ion-label>
+      <ion-note slot="end">{{firstName}}</ion-note>
+    </ion-item>
+    <ion-item>
+      <ion-label>Last Name</ion-label>
+      <ion-note slot="end">{{lastName}}</ion-note>
+    </ion-item>
+    <ion-item>
+      <ion-label>Age</ion-label>
+      <ion-note slot="end">{{age}}</ion-note>
+    </ion-item>
+   </ion-list>
 
-    <ion-grid>
-      <ion-row>
-        <ion-col>
-            <ion-button size="large" expand="block" (click)="logout()">Logout</ion-button>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
 
-  </div>
+
 </ion-content>
 
 
-<app-footer></app-footer>
+<div>
+  <ion-footer>
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <ion-button size="large" expand="block" (click)="logout()">Logout</ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-footer>
+
+  <app-footer></app-footer>
+</div>

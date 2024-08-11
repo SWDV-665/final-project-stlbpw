@@ -21,6 +21,8 @@ import { HttpClient } from '@angular/common/http';
 import { AlertController } from '@ionic/angular';
 import { NutritionLabel } from '../nutrition-label';
 import { UserdataService } from '../userdata.service';
+import { Platform } from '@ionic/angular';
+import { OffdataService } from '../offdata.service';
 
 @Component({
   selector: 'app-scan',
@@ -38,7 +40,6 @@ export class ScanPage implements OnInit {
   public barcodeResult?: string;
   _username!: string;
   _title!: string;
-  _scanStatus: number = 0;
   isCancelButtonDisabled = true;
   isSaveButtonDisabled = true;
   nutritionLabel!: NutritionLabel;
@@ -48,7 +49,9 @@ export class ScanPage implements OnInit {
     private userAdminService: UserAdminService,
     private http: HttpClient,
     public alertController: AlertController,
-    private userdataService: UserdataService) {
+    private userdataService: UserdataService,
+    private platform: Platform,
+    private offdataService: OffdataService) {
     addIcons({ personOutline });
     addIcons({ homeOutline });
     addIcons({ settingsOutline });
@@ -74,8 +77,15 @@ export class ScanPage implements OnInit {
     }
   }
 
-  addPhotoToGallery() {
-    this.photoService.addNewToGallery();
+  ionViewDidEnter() {
+    if (this.userAdminService.getLoggedInStatus() == false) {
+      console.log('Not Logged In');
+      this.router.navigate(['/home']);
+    }
+    else {
+      console.log('ionViewDidEnter Scan Page');
+      this.startScan();
+    }
   }
 
   async presentAlert() {
@@ -92,17 +102,41 @@ export class ScanPage implements OnInit {
 
   async startScan() {
     try {
-      const code = await this.photoService.scanBarcode();
-      console.log(code);
-      this.barcodeResult = this.photoService.getBarcode();
-      await this.getNutritionInfoFromOffServer();
+      if (this.platform.is('mobile')) {
+        console.log('Scanning Barcode Mobile');
+        //print what platform is being used
+        console.log('Platform: ' + this.platform.platforms());
+        const code = await this.photoService.scanBarcode();
+        console.log(code);
+        this.barcodeResult = this.photoService.getBarcode();
+      }
+      else {
+        console.log('Scanning Barcode Browser');
+        //print what platform is being used
+        console.log('Platforms: ' + this.platform.platforms());
+        this.barcodeResult = "047495112900";
+      }
+      //this.nutritionLabel = new NutritionLabel();
+      this.nutritionLabel = await this.offdataService.getNutritionInfoFromOffServer(this.barcodeResult);
+      if (!this.nutritionLabel.isValid()) {
+        this.presentAlert();
+      }
+      else {
+        this.isCancelButtonDisabled = false;
+        this.isSaveButtonDisabled = false;
+        this.isCardDisabled = false;
+      }
+ 
     } catch (e) {
       console.log(e);
     }
   }
 
-  saveNutritionData()
-  {
+  openHistory() {
+    this.router.navigate(['/history']);
+  }
+
+  saveNutritionData() {
     this.userdataService.addNutritionLabel(this.nutritionLabel);
     this.router.navigate(['/history']);
   }
@@ -113,130 +147,4 @@ export class ScanPage implements OnInit {
     this.isCardDisabled = true;
     this.nutritionLabel.valid = false;
   }
-
-  async getNutritionInfoFromOffServer() {
-    console.log('Getting Nutrition Info from OFF Server');
-    const url = "https://world.openfoodfacts.net/api/v3/product/" + this.barcodeResult + "?fields=brand_owner,product_name,serving_size,nutriments";
-    console.log(url);
-    this.http.get(url).subscribe({
-      next: (data: any) => {
-        this.nutritionLabel = new NutritionLabel();
-        console.log(data);
-        this._scanStatus = data["status"];
-        console.log("Scan Status1: " + data["status"]);
-        this.nutritionLabel.barcode = data["code"];
-        this.nutritionLabel.productUrl = "https://world.openfoodfacts.org/product/"+ data["code"];
-        this.nutritionLabel.brand = data["product"]["brand_owner"];
-        this.nutritionLabel.name = data["product"]["product_name"];
-        this.nutritionLabel.servingSize = data["product"]["serving_size"];
-        this.nutritionLabel.calories = data["product"]["nutriments"]["energy-kcal_serving"];
-        this.nutritionLabel.totalFat = data["product"]["nutriments"]["fat_serving"];
-        this.nutritionLabel.saturatedFat = data["product"]["nutriments"]["saturated-fat_serving"];
-        this.nutritionLabel.transFat = data["product"]["nutriments"]["trans-fat_serving"];
-        this.nutritionLabel.cholesterol = data["product"]["nutriments"]["cholesterol_serving"] * 1000;
-        this.nutritionLabel.sodium = data["product"]["nutriments"]["sodium_serving"] * 1000;
-        this.nutritionLabel.totalCarbohydrates = data["product"]["nutriments"]["carbohydrates_serving"];
-        this.nutritionLabel.dietaryFiber = data["product"]["nutriments"]["fiber_serving"];
-        this.nutritionLabel.totalSugars = data["product"]["nutriments"]["sugars_serving"];
-        this.nutritionLabel.addedSugars = data["product"]["nutriments"]["sugars_serving"];
-        this.nutritionLabel.protein = data["product"]["nutriments"]["proteins_serving"];
-        this.nutritionLabel.vitaminD = data["product"]["nutriments"]["vitamin-d_serving"] * 1000;
-        this.nutritionLabel.calcium = data["product"]["nutriments"]["calcium_serving"] * 1000;
-        this.nutritionLabel.iron = data["product"]["nutriments"]["iron_serving"] * 1000;
-        this.nutritionLabel.potassium = data["product"]["nutriments"]["potassium_serving"] * 1000;
-        this.nutritionLabel.valid = true;
-        this.nutritionLabel.correctNaN();
-        //this.logData(this.nutritionLabel);
-        this.isCancelButtonDisabled = false;
-        this.isSaveButtonDisabled = false;
-        this.isCardDisabled = false;
-      },
-      error: (e) => {
-        console.error(e);
-        if (e.status == 404) {
-          this.presentAlert();
-        }
-      },
-      complete: () => console.info('complete')
-    })
-
-  }
-
-
-
-  async TESTgetNutritionInfoFromOffServer() {
-    console.log('Getting Nutrition Info from OFF Server');
-    const url = "https://world.openfoodfacts.net/api/v3/product/047495112900?fields=brand_owner,product_name,serving_size,nutriments";
-    //const url = "https://world.openfoodfacts.net/api/v2/product/0041318225365";
-    console.log(url);
-    this.http.get(url).subscribe({
-      next: (data: any) => {
-        this.nutritionLabel = new NutritionLabel();
-        console.log(data);
-        this._scanStatus = data["status"];
-        console.log("Scan Status1: " + data["status"]);
-        this.nutritionLabel.barcode = data["code"];
-        this.nutritionLabel.productUrl = "https://world.openfoodfacts.org/product/"+ data["code"];
-        this.nutritionLabel.brand = data["product"]["brand_owner"];
-        this.nutritionLabel.name = data["product"]["product_name"];
-        this.nutritionLabel.servingSize = data["product"]["serving_size"];
-        this.nutritionLabel.calories = data["product"]["nutriments"]["energy-kcal_serving"];
-        this.nutritionLabel.totalFat = data["product"]["nutriments"]["fat_serving"];
-        this.nutritionLabel.saturatedFat = data["product"]["nutriments"]["saturated-fat_serving"];
-        this.nutritionLabel.transFat = data["product"]["nutriments"]["trans-fat_serving"];
-        this.nutritionLabel.cholesterol = data["product"]["nutriments"]["cholesterol_serving"] * 1000;
-        this.nutritionLabel.sodium = data["product"]["nutriments"]["sodium_serving"] * 1000;
-        this.nutritionLabel.totalCarbohydrates = data["product"]["nutriments"]["carbohydrates_serving"];
-        this.nutritionLabel.dietaryFiber = data["product"]["nutriments"]["fiber_serving"];
-        this.nutritionLabel.totalSugars = data["product"]["nutriments"]["sugars_serving"];
-        this.nutritionLabel.addedSugars = data["product"]["nutriments"]["sugars_serving"];
-        this.nutritionLabel.protein = data["product"]["nutriments"]["proteins_serving"];
-        this.nutritionLabel.vitaminD = data["product"]["nutriments"]["vitamin-d_serving"] * 1000;
-        this.nutritionLabel.calcium = data["product"]["nutriments"]["calcium_serving"] * 1000;
-        this.nutritionLabel.iron = data["product"]["nutriments"]["iron_serving"] * 1000;
-        this.nutritionLabel.potassium = data["product"]["nutriments"]["potassium_serving"] * 1000;
-        //this.logData(this.nutritionLabel);
-        this.nutritionLabel.valid = true;
-        this.nutritionLabel.correctNaN();
-        this.isCancelButtonDisabled = false;
-        this.isSaveButtonDisabled = false;
-        this.isCardDisabled = false;
-      },
-      error: (e) => {
-        console.error(e);
-        if (e.status == 404) {
-          this.presentAlert();
-        }
-      },
-      complete: () => console.info('complete')
-    })
-
-  }
-
-  logData(nutritionLabel: NutritionLabel) {
-    //log each field of the nutrition label
-    console.log("Barcode: " + nutritionLabel.barcode);
-    console.log("Product URL: " + nutritionLabel.productUrl);
-    console.log("Brand: " + nutritionLabel.brand);
-    console.log("Name: " + nutritionLabel.name);
-    console.log("Serving Size: " + nutritionLabel.servingSize);
-    console.log("Calories: " + nutritionLabel.calories);
-    console.log("Total Fat: " + nutritionLabel.totalFat);
-    console.log("Saturated Fat: " + nutritionLabel.saturatedFat);
-    console.log("Trans Fat: " + nutritionLabel.transFat);
-    console.log("Cholesterol: " + nutritionLabel.cholesterol);
-    console.log("Sodium: " + nutritionLabel.sodium);
-    console.log("Total Carbohydrates: " + nutritionLabel.totalCarbohydrates);
-    console.log("Dietary Fiber: " + nutritionLabel.dietaryFiber);
-    console.log("Total Sugars: " + nutritionLabel.totalSugars);
-    console.log("Added Sugars: " + nutritionLabel.addedSugars);
-    console.log("Protein: " + nutritionLabel.protein);
-    console.log("Vitamin D: " + nutritionLabel.vitaminD);
-    console.log("Calcium: " + nutritionLabel.calcium);
-    console.log("Iron: " + nutritionLabel.iron);
-    console.log("Potassium: " + nutritionLabel.potassium);
-  }
-
-
-
 }

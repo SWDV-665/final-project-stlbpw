@@ -10,7 +10,6 @@ import { personOutline } from 'ionicons/icons';
 import { homeOutline } from 'ionicons/icons';
 import { settingsOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
-import { UserAdminService } from '../user-admin.service';
 import { HeaderComponent } from '../header/header.component';
 import { FooterComponent } from '../footer/footer.component';
 import { UserdataService } from '../userdata.service';
@@ -19,6 +18,7 @@ import { pencil, trash, share } from 'ionicons/icons';
 import { Location } from '@angular/common';
 import { ToastController } from '@ionic/angular';
 import { Share } from '@capacitor/share';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-history',
@@ -38,10 +38,10 @@ export class HistoryPage implements OnInit {
   nutritionLabels: NutritionLabel[] = [];
 
   constructor(private router: Router,
-    private userAdminService: UserAdminService,
     private userdataService: UserdataService,
     private location: Location,
-    public toastController: ToastController) {
+    public toastController: ToastController,
+    public alertController: AlertController) {
     addIcons({ personOutline });
     addIcons({ homeOutline });
     addIcons({ settingsOutline });
@@ -53,33 +53,49 @@ export class HistoryPage implements OnInit {
   }
 
   ionViewWillEnter() {
-    console.log('ionViewWillEnter History Page');
-    if (this.userAdminService.getLoggedInStatus() == false) {
+    if (this.userdataService.getLoggedInStatus() == false) {
       console.log('Not Logged In');
       this.router.navigate(['/home']);
     }
     else {
-      this._title = this.userAdminService.getUsername() + "'s History";
-      //populate local array with data from the service
-      this.nutritionLabels = this.userdataService.getNutritionLabels();
-      console.log(this._username);
+      this._title = this.userdataService.getUsername() + "'s History";
+      //capitalize first letter of username
+      this._title = this._title.charAt(0).toUpperCase() + this._title.slice(1);
+      this.getNutritionData();
     }
   }
 
-  dummyAction() {
-
+  getNutritionData() {
+    //get the nutrition labels from the server
+    this.userdataService.syncNutritionLabels().subscribe({
+      next: (data: any) => {
+        console.log('Print: 2');
+        this.nutritionLabels = this.userdataService.getNutritionLabels();
+      },
+      error: (error: any) => {
+        console.log('Error syncing nutrition labels');
+      }
+    });
   }
 
   deleteItem(index: number) {
-    console.log('Delete Item');
-    this.presentToast(this.userdataService.getProductName(index),'Deleted', 'bottom');
-    this.userdataService.deleteItem(index);
-    this.nutritionLabels = this.userdataService.getNutritionLabels();
 
- }
+    var productName = this.userdataService.getProductName(index);
+
+    this.userdataService.deleteItem(index).subscribe({
+      next: (data: any) => {
+        this.presentToast(productName, 'Deleted', 'bottom');
+        this.getNutritionData();
+      },
+      error: (error: any) => {
+        console.log('Error deleting item');
+        this.presentServerAlert();
+      }
+    });
+
+  }
 
   backToCallingPage() {
-    console.log('Back to calling page');
     this.location.back();
   }
 
@@ -94,6 +110,8 @@ export class HistoryPage implements OnInit {
       let url = this.userdataService.getProductUrl(index);
       this.presentToast(name, 'Shared', 'bottom');
 
+      slider.close();
+
       //using capacitor share plugin
       const title: string = 'Sharing Food Item';
       const text: string = name + '\n' + url;
@@ -103,7 +121,6 @@ export class HistoryPage implements OnInit {
         text: text,
       });
 
-      slider.close();
     }
   }
 
@@ -122,6 +139,17 @@ export class HistoryPage implements OnInit {
     } catch (error) {
       console.error('Error presenting toast: ', error);
     }
+  }
+
+  async presentServerAlert() {
+    const alert = await this.alertController.create({
+      header: 'Server Error',
+      subHeader: 'Problem with server',
+      message: 'Please try again',
+      buttons: ['OK']
+    });
+
+    await alert.present();
   }
 
 }

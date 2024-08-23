@@ -25,7 +25,7 @@ export class PhotoService {
   public async scanBarcode(): Promise<string> {
       this.barcodeResult = (await CapacitorBarcodeScanner.scanBarcode(this.options)).ScanResult;
       this.barcodeResult = this.fixUPCA(this.barcodeResult);
-      console.log('Barcode data:', this.barcodeResult);
+      //console.log('Barcode data:', this.barcodeResult);
       return this.barcodeResult;
   }
 

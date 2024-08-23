@@ -8,8 +8,9 @@ import { settingsOutline } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
 //import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { UserAdminService } from '../user-admin.service';
+import { UserdataService } from '../userdata.service';
 import { HeaderComponent } from '../header/header.component';
+import { AlertController } from '@ionic/angular';
 
 
 @Component({
@@ -27,7 +28,8 @@ export class HomePage {
   _title!: string;
 
   constructor(private router: Router,
-    private userAdminService: UserAdminService){
+    private userdataService: UserdataService,
+    public alertController: AlertController) {
     addIcons({ personOutline });
     addIcons({ homeOutline });
     addIcons({ settingsOutline });
@@ -35,19 +37,76 @@ export class HomePage {
     this._title = "Nutrition Scanner"
   }
 
-  async login() {
-    console.log('Login');
-    console.log('Username: ' + this._username);
-    console.log('Password: ' + this._password);
-
-    await this.userAdminService.login(this._username, this._password);
-
+  ionViewWillEnter() {
     //clear the fields
     this._username = '';
     this._password = '';
+    if (this.userdataService.getLoggedInStatus() == true){
+      this.router.navigate(['/user']);
+    }
+  }
 
 
-    this.router.navigate(['/user']);
+  async login() {
+    let success;
+
+    this.userdataService.userLogin(this._username, this._password).subscribe({
+      next: (data: any) => {
+      success = true;
+      this.userdataService.userLoggedIn = true;
+      //clear the fields
+      this._username = '';
+      this._password = '';
+      this.router.navigate(['/user']);
+    }, 
+    error: (error: any) => {
+      console.log('Login failed Home Page');
+      console.log(error);
+      success = false;
+      this.userdataService.userLoggedIn = false;
+      this._username = '';
+      this._password = '';
+      if (error.status == 404) {
+        this.presentUserAlert();
+      }
+      else {
+        this.presentServerAlert();
+      }
+    }
+  });
+
+    if (!success) {
+
+      return;
+    }
+
+  }
+
+  async createUser() {
+    //route to create user page
+    this.router.navigate(['/create-user']);
+  }
+
+  async presentUserAlert() {
+    const alert = await this.alertController.create({
+      header: 'User Not Found',
+      subHeader: 'Invalid Username or Password',
+      message: 'Please try again',
+      buttons: ['OK']
+    });
+
+    await alert.present();
+  }
+
+  async presentServerAlert() {
+    const alert = await this.alertController.create({
+      header: 'Server Error',
+      subHeader: 'Problem with server',
+      message: 'Please try again',
+      buttons: ['OK']
+    });
+
+    await alert.present();
   }
 
 

@@ -6,7 +6,7 @@ export class User {
     firstname: string;
     lastname: string;
     email: string;
-    age: number;
+    age: number = 0;
     password: string;
     foodinfo: NutritionLabel[];
 

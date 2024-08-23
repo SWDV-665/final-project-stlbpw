@@ -1,16 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonIcon, IonList, IonItem, IonInput, IonButton, IonLabel,
-  IonGrid, IonRow, IonCol} from '@ionic/angular/standalone';
+import {
+  IonContent, IonHeader, IonTitle, IonToolbar, IonIcon, IonList, IonItem, IonInput, IonButton, IonLabel,
+  IonGrid, IonRow, IonCol
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { personOutline } from 'ionicons/icons';
 import { homeOutline } from 'ionicons/icons';
 import { settingsOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
-import { UserAdminService } from '../user-admin.service';
 import { HeaderComponent } from '../header/header.component';
 import { FooterComponent } from '../footer/footer.component';
+import { UserdataService } from '../userdata.service';
 
 @Component({
   selector: 'app-user',
@@ -26,7 +28,7 @@ export class UserPage implements OnInit {
   _title!: string;
 
   constructor(private router: Router,
-    private userAdminService: UserAdminService) {
+    private userdataService: UserdataService) {
     addIcons({ personOutline });
     addIcons({ homeOutline });
     addIcons({ settingsOutline });
@@ -37,25 +39,26 @@ export class UserPage implements OnInit {
   }
 
   ionViewWillEnter() {
-    console.log('ionViewWillEnter User Page');
 
-    if (!this.userAdminService.getLoggedInStatus()) {
+    if (!this.userdataService.getLoggedInStatus()) {
       console.log('Not Logged In');
       this.router.navigate(['/home']);
     }
     else {
-      this._title = "Welcome " + this.userAdminService.getUsername();
-      console.log(this._username);
+      var username = this.userdataService.getUsername();
+      //capitalize first letter of username
+      username = username.charAt(0).toUpperCase() + username.slice(1);
+      this._title = "Welcome " + username;
+
+      let num = this.userdataService.getTotalCalories();
     }
   }
 
   openScan() {
-    console.log('Open Scan');
     this.router.navigate(['/scan']);
   }
 
   openHistory() {
-    console.log('Open History');
     this.router.navigate(['/history']);
   }
 

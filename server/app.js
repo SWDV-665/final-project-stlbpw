@@ -10,53 +10,36 @@ app.use(express.json());
 app.use(cors());
 
 const port = 3665;
-// const privateKey = fs.readFileSync('./ssl/key.pem');
-// const certificate = fs.readFileSync('./ssl/cert.pem');
 
 var db;
 var dbCollection;
 
-const uri = "mongodb+srv://brucepwilhelm:<PASSWORD>@nutritionapp.ivueb.mongodb.net/?retryWrites=true&w=majority&appName=NutritionApp";
+const uri = "mongodb+srv://brucepwilhelm:SeYIXfylGlnBD0wZ@nutritionapp.ivueb.mongodb.net/?retryWrites=true&w=majority&appName=NutritionApp";
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
 });
 
 async function run() {
     try {
-      await client.connect();
-      console.log("Connected to MongoDB!");
-      db = client.db('NutritionAppDB');
-      dbCollection = db.collection('NutritionAppCollection');
-      console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        await client.connect();
+        console.log("Connected to MongoDB!");
+        db = client.db('NutritionAppDB');
+        dbCollection = db.collection('NutritionAppCollection');
     } catch (err) {
-      console.dir(err);
+        console.dir(err);
     }
 }
 run();
 
-// var mongoPort = 27017;
-// const url = `mongodb://localhost:${mongoPort}/NutritionAppDB`;
-
-// MongoClient.connect(url)
-//     .then(function (client) {
-//         console.log(`Connected successfully to MongoDB server on port ${mongoPort}`);
-//         db = client.db('NutritionAppDB');``
-//         dbCollection = db.collection('NutritionAppCollection');
-
-//     })
-//     .catch(function (err) {
-//         console.error('Error connecting to MongoDB server:', err);
-//     });
-
 
 //get all items from the database
 app.get('/api/Nutrition', (req, res) => {
-    dbCollection.find({}).sort({lastModified: -1}).toArray()
+    dbCollection.find({}).sort({ lastModified: -1 }).toArray()
         .then(function (docs) {
             res.json(docs);
             console.log("returning all items");
@@ -67,9 +50,30 @@ app.get('/api/Nutrition', (req, res) => {
         });
 });
 
-//get all items from the database
+//get data from the database by id 
+app.get('/api/Nutrition/:id', (req, res) => {
+    var userId = req.params.id;
+    var ObjectId = require('mongodb').ObjectId;
+    var _userId = new ObjectId(userId);
+
+    dbCollection.find({ _id: _userId }).toArray()
+        .then(function (docs) {
+            if (docs.length > 0) {
+                res.json(docs[0]);
+                console.log("returning items for user: " + docs[0].user.username);
+            } else {
+                res.status(404).send('No items found');
+            }
+        })
+        .catch(function (err) {
+            console.error('Error getting documents from collection:', err);
+            res.status(500).send('Error getting documents from collection');
+        });
+});
+
+//get latest item from the database
 app.get('/api/Nutrition/Latest', (req, res) => {
-    dbCollection.find().sort({lastModified: -1}).limit(1).toArray()
+    dbCollection.find().sort({ lastModified: -1 }).limit(1).toArray()
         .then(function (docs) {
             res.json(docs);
         })
@@ -79,9 +83,9 @@ app.get('/api/Nutrition/Latest', (req, res) => {
         });
 });
 
-//create item in the database
-app.post('/api/Nutrition', (req, res) => {
-    console.log(req.body);
+//create user in the database
+app.post('/api/Nutrition/CreateUser', (req, res) => {
+    //console.log(req.body);
 
     const user = new User(req.body.user);
     const foodinfo = req.body.foodinfo.map(food => new FoodInfo(food));
@@ -90,34 +94,50 @@ app.post('/api/Nutrition', (req, res) => {
         foodinfo: foodinfo.map(food => food.toMongoDB())
     };
 
-    dbCollection.insertOne(dataToInsert)
-        .then(result => {
-            console.log(`Successfully inserted item with _id: ${result.insertedId}`)
-            res.status(200).json({message: `Successfully inserted item with _id: ${result.insertedId}`});
+    //check to see if username already exists
+    dbCollection.find({ $or: [{ "user.username": user.username }, { "user.email": user.email }] }).toArray()
+        .then(function (docs) {
+            if (docs.length > 0) {
+                res.status(409).send('Username or email already exists');
+            } else {
+                dbCollection.insertOne(dataToInsert)
+                    .then(result => {
+                        console.log(`Successfully inserted item with _id: ${result.insertedId}`)
+                        res.status(200).json({ message: `Successfully inserted item with _id: ${result.insertedId}` });
+                    })
+                    .catch(err => {
+                        console.error(`Failed to insert item: ${err}`)
+                        res.status(500).send('Failed to insert item');
+                    });
+            }
         })
-        .catch(err => {
-            console.error(`Failed to insert item: ${err}`)
-            res.status(500).send('Failed to insert item');
+        .catch(function (err) {
+            console.error('Error getting documents from collection:', err);
+            res.status(500).send('Error getting documents from collection');
         });
+
 
     //res.status(200).json({message: `Successfully Called`});
 });
 
-//create item in the database
+//Login user in the database
 app.post('/api/Nutrition/Login', (req, res) => {
-    console.log(req.body);
+    //console.log(req.body);
 
     const username = req.body.username;
     const password = req.body.password;
 
-    console.log(username);
-    console.log(password);
+    //console.log(username);
+    //console.log(password);
 
     //find _id of the user
     dbCollection.find({ "user.username": username, "user.password": password }).toArray()
         .then(function (docs) {
             if (docs.length > 0) {
+                //return user data
                 res.status(200).json(docs[0]);
+                console.log("user logged in: " + docs[0].user.username);
+                console.log("returning user data for user: " + docs[0].user.username);
             } else {
                 res.status(404).send('No user found');
             }
@@ -131,7 +151,7 @@ app.post('/api/Nutrition/Login', (req, res) => {
     //res.status(200).json({message: `Successfully Called`});
 });
 
-//update item quantity in the database by id
+//update user data in the database
 app.put('/api/Nutrition', (req, res) => {
 
     const user = new User(req.body.user);
@@ -147,7 +167,7 @@ app.put('/api/Nutrition', (req, res) => {
     dbCollection.updateOne({ _id: _userId }, { $set: dataToUpdate })
         .then(result => {
             if (result.matchedCount > 0) {
-                console.log(`Successfully updated item id: ${userId}`)
+                console.log(`Successfully updated for: ${user.username}`)
                 res.status(200).json({ message: `Successfully updated item with id: ${userId}` });
             } else {
                 console.log(`No items matched with id: ${userId}`)
@@ -160,7 +180,7 @@ app.put('/api/Nutrition', (req, res) => {
         });
 });
 
-//delete item from the database by id
+//delete item from the database by id, this is for a whole user not a food item
 app.delete('/api/Nutrition/:id', (req, res) => {
     console.log(req.params.id);
     var userId = req.params.id;
@@ -190,12 +210,6 @@ app.get('/', (req, res) => {
     res.sendFile(path('public/index.html'));
 });
 
-// https.createServer({
-//     key: privateKey,
-//     cert: certificate
-//   }, app).listen(port, () => {
-//     console.log(`Server is listening on port ${port}`);
-//   });
 
 //listen on port
 app.listen(process.env.PORT || port, () => {

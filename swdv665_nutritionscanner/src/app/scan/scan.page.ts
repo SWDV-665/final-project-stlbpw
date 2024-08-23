@@ -13,8 +13,6 @@ import { homeOutline } from 'ionicons/icons';
 import { settingsOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { PhotoService } from '../photo.service';
-// FIGURE OUT THE BARCODE SCANNER https://ionic.io/blog/introducing-capacitor-barcode-scanner-plugin, might need to use the old one
-import { UserAdminService } from '../user-admin.service';
 import { HeaderComponent } from '../header/header.component';
 import { FooterComponent } from '../footer/footer.component';
 import { HttpClient } from '@angular/common/http';
@@ -46,7 +44,6 @@ export class ScanPage implements OnInit {
   isCardDisabled = true;
 
   constructor(private router: Router, public photoService: PhotoService,
-    private userAdminService: UserAdminService,
     private http: HttpClient,
     public alertController: AlertController,
     private userdataService: UserdataService,
@@ -62,38 +59,47 @@ export class ScanPage implements OnInit {
   }
 
   ionViewWillEnter() {
-    console.log('ionViewWillEnter Scan Page');
-    if (this.userAdminService.getLoggedInStatus() == false) {
+    if (this.userdataService.getLoggedInStatus() == false) {
       console.log('Not Logged In');
       this.router.navigate(['/home']);
     }
     else {
-      this._title = this.userAdminService.getUsername() + "'s Scanner";
+      this._title = this.userdataService.getUsername() + "'s Scanner";
+      //capitalize first letter of username
+      this._title = this._title.charAt(0).toUpperCase() + this._title.slice(1);
       this.nutritionLabel = new NutritionLabel();
       this.isCancelButtonDisabled = true;
       this.isSaveButtonDisabled = true;
       this.isCardDisabled = true;
-      console.log(this._username);
     }
   }
 
   ionViewDidEnter() {
-    if (this.userAdminService.getLoggedInStatus() == false) {
+    if (this.userdataService.getLoggedInStatus() == false) {
       console.log('Not Logged In');
       this.router.navigate(['/home']);
     }
     else {
-      console.log('ionViewDidEnter Scan Page');
       this.startScan();
     }
   }
 
   async presentAlert() {
-    //this.nutritionLabel.servingSize = "Invalid Barcode";
     const alert = await this.alertController.create({
       header: 'Invalid Barcode',
       subHeader: 'The barcode you scanned is not valid',
       message: 'Please try scanning a different barcode',
+      buttons: ['OK']
+    });
+
+    await alert.present();
+  }
+
+  async presentServerAlert() {
+    const alert = await this.alertController.create({
+      header: 'Server Error',
+      subHeader: 'Problem with server',
+      message: 'Please try again',
       buttons: ['OK']
     });
 
@@ -116,17 +122,17 @@ export class ScanPage implements OnInit {
         console.log('Platforms: ' + this.platform.platforms());
         this.barcodeResult = "047495112900";
       }
-      //this.nutritionLabel = new NutritionLabel();
-      this.nutritionLabel = await this.offdataService.getNutritionInfoFromOffServer(this.barcodeResult);
-      if (!this.nutritionLabel.isValid()) {
-        this.presentAlert();
-      }
-      else {
-        this.isCancelButtonDisabled = false;
-        this.isSaveButtonDisabled = false;
-        this.isCardDisabled = false;
-      }
- 
+      this.offdataService.getNutritionInfoFromOffServer(this.barcodeResult).subscribe((data: NutritionLabel) => {
+        this.nutritionLabel = data;
+        if (!this.nutritionLabel.isValid()) {
+          this.presentAlert();
+        }
+        else {
+          this.isCancelButtonDisabled = false;
+          this.isSaveButtonDisabled = false;
+          this.isCardDisabled = false;
+        }
+      });
     } catch (e) {
       console.log(e);
     }
@@ -137,8 +143,15 @@ export class ScanPage implements OnInit {
   }
 
   saveNutritionData() {
-    this.userdataService.addNutritionLabel(this.nutritionLabel);
-    this.router.navigate(['/history']);
+    this.userdataService.addNutritionLabel(this.nutritionLabel).subscribe({
+      next: (data: any) => {
+        this.router.navigate(['/history']);
+      },
+      error: (error: any) => {
+        console.log('Error saving item');
+        this.presentServerAlert();
+      }
+    });
   }
 
   cancel() {

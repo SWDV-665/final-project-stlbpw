@@ -54,7 +54,11 @@ export class NutritionLabel {
             this.code = data["code"];
             this.barcode = data["code"];
             this.productUrl = "https://world.openfoodfacts.org/product/" + data["code"];
-            this.brand = data["product"]["brand_owner"];
+            if (data["product"]["brands"]) {
+                this.brand = data["product"]["brands"];
+            } else {
+                this.brand = data["product"]["brand_owner"];
+            }
             this.name = data["product"]["product_name"];
             this.servingSize = data["product"]["serving_size"];
             this.calories = data["product"]["nutriments"]["energy-kcal_serving"];
@@ -137,17 +141,17 @@ export class NutritionLabel {
 
     private validate() {
         if (isNaN(this.calories) && isNaN(this.totalFat) && isNaN(this.totalCarbohydrates) && isNaN(this.protein)) {
-            console.log('Calories,Fat,Carbs,Prot is NaN');
+            console.log('Nutri Validate Calories,Fat,Carbs,Prot is NaN');
             this.valid = false;
             return false;
         }
         else if (this.calories < 0 || this.totalFat < 0 || this.totalCarbohydrates < 0 || this.protein < 0) {
-            console.log('Calories,Fat,Carbs,Prot is negative');
+            console.log('Nutri Validate Calories,Fat,Carbs,Prot is negative');
             this.valid = false;
             return false;
         }
         else {
-            console.log('Calories,Fat,Carbs,Prot is valid');
+            console.log('Nutri Validate Calories,Fat,Carbs,Prot is valid');
             this.correctNaN();
             this.valid = true;
             return true;

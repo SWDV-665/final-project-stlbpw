@@ -5,7 +5,7 @@ import { personOutline } from 'ionicons/icons';
 import { homeOutline } from 'ionicons/icons';
 import { settingsOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
-import { UserAdminService } from '../user-admin.service';
+import { UserdataService } from '../userdata.service';
 
 @Component({
   selector: 'app-header',
@@ -19,7 +19,7 @@ export class HeaderComponent  implements OnInit {
 
 
   constructor(private router: Router,
-    private userAdminService: UserAdminService) { 
+    private userdataService: UserdataService) { 
     addIcons({ personOutline });
     addIcons({ homeOutline });
     addIcons({ settingsOutline });
@@ -28,23 +28,19 @@ export class HeaderComponent  implements OnInit {
   ngOnInit() {}
 
   goHome() {
-    if (this.userAdminService.getLoggedInStatus() == false) {
-      console.log('Go Home');
+    if (this.userdataService.getLoggedInStatus() == false) {
       this.router.navigate(['/home']);
     }
     else {
-      console.log('Go to User Page');
       this.router.navigate(['/user']);
     }
   }
 
   openSettings() {
-    console.log('Open Settings');
     //this.router.navigate(['/settings']);
   }
 
   openProfile() {
-    console.log('Open Profile');
     this.router.navigate(['/user-profile']);
   }
 

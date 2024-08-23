@@ -1,14 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonFooter, IonTitle, IonToolbar, IonIcon, IonList, IonItem, 
-  IonGrid, IonRow, IonCol, IonInput, IonButton, IonLabel, IonNote } from '@ionic/angular/standalone';
+import {
+  IonContent, IonHeader, IonFooter, IonTitle, IonToolbar, IonIcon, IonList, IonItem,
+  IonGrid, IonRow, IonCol, IonInput, IonButton, IonLabel, IonNote
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { personOutline } from 'ionicons/icons';
 import { homeOutline } from 'ionicons/icons';
 import { settingsOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
-import { UserAdminService } from '../user-admin.service';
 import { UserdataService } from '../userdata.service';
 import { HeaderComponent } from '../header/header.component';
 import { FooterComponent } from '../footer/footer.component';
@@ -33,7 +34,6 @@ export class UserProfilePage implements OnInit {
   age: number = 0;
 
   constructor(private router: Router,
-    private userAdminService: UserAdminService,
     private userdataService: UserdataService) {
     addIcons({ personOutline });
     addIcons({ homeOutline });
@@ -44,25 +44,25 @@ export class UserProfilePage implements OnInit {
   }
 
   ionViewWillEnter() {
-    console.log('ionViewWillEnter User Profile Page');
-    if (this.userAdminService.getLoggedInStatus() == false) {
+    if (this.userdataService.getLoggedInStatus() == false) {
       console.log('Not Logged In');
       this.router.navigate(['/home']);
     }
     else {
-      this._title = this.userAdminService.getUsername() + "'s Profile";
+      this._title = this.userdataService.getUsername() + "'s Profile";
+      //capitalize first letter of username
+      this._title = this._title.charAt(0).toUpperCase() + this._title.slice(1);
       this.userName = this.userdataService.appUser.username;
       this.email = this.userdataService.appUser.email;
       this.firstName = this.userdataService.appUser.firstname;
       this.lastName = this.userdataService.appUser.lastname;
       this.age = this.userdataService.appUser.age;
-      console.log(this._username);
     }
   }
 
   logout() {
     console.log('Logout');
-    this.userAdminService.logout();
+    this.userdataService.logout();
     this.router.navigate(['/home']);
   }
 

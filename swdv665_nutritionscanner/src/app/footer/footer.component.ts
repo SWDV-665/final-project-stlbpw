@@ -6,7 +6,6 @@ import { personOutline } from 'ionicons/icons';
 import { homeOutline } from 'ionicons/icons';
 import { settingsOutline } from 'ionicons/icons';
 import { Router, NavigationEnd } from '@angular/router';
-import { UserAdminService } from '../user-admin.service';
 import { UserdataService } from '../userdata.service';
 import { Subscription } from 'rxjs';
 

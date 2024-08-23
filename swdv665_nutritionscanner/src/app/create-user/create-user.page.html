@@ -1,0 +1,66 @@
+<app-header [title]="_title"></app-header>
+<ion-content [fullscreen]="true">
+  <div id="image-container">
+    <img src="assets/img/foodcover.png" alt="Description of the image">
+  </div>
+
+  <form (ngSubmit)="createUser()">
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-input type="text" [(ngModel)]="_username" name="_username" placeholder="Username"></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-input type="text" [(ngModel)]="_firstname" name="_firstname" placeholder="First Name"></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-input type="text" [(ngModel)]="_lastname" name="_lastname" placeholder="Last Name"></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-input type="email" [(ngModel)]="_email" name="_email" placeholder="Email"></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <!-- <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-input type="text" [(ngModel)]="_age" name="_age" placeholder="Age"></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row> -->
+      <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-input type="password" [(ngModel)]="_password" name="_password" placeholder="Password"></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-input type="password" [(ngModel)]="_confirmPassword" name="_confirmPassword" placeholder="Confirm Password"></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-button size="large" expand="full" type="submit">Create User</ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </form>
+
+</ion-content>
